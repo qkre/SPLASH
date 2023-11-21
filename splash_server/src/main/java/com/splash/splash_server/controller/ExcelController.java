@@ -2,6 +2,7 @@ package com.splash.splash_server.controller;
 
 import com.mysql.cj.log.Log;
 import com.splash.splash_server.domain.excel.Excel;
+import com.splash.splash_server.service.ScoreService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -28,6 +29,8 @@ import java.util.logging.Logger;
 @RequestMapping("/api/excel")
 public class ExcelController {
 
+    private final ScoreService scoreService;
+
     @GetMapping("/test")
     public ResponseEntity<String> main(){
         return ResponseEntity.ok("EXCEL");
@@ -37,6 +40,8 @@ public class ExcelController {
     public ResponseEntity<List<Excel>> readExcel(@RequestParam("file")MultipartFile file, Model model) throws IOException{
 
         List<Excel> dataList = new ArrayList<>();
+
+        System.out.println("file.getOriginalFilename() = " + file.getOriginalFilename());
 
         String extensions = FilenameUtils.getExtension(file.getOriginalFilename());
 
@@ -52,10 +57,16 @@ public class ExcelController {
             workbook = new HSSFWorkbook(file.getInputStream());
         }
 
-        Sheet workSheet = workbook.getSheetAt(0);
+        Sheet workSheet = workbook.getSheetAt(1);
+
 
         for (int i = 1; i < workSheet.getPhysicalNumberOfRows(); i++) {
             Row row = workSheet.getRow(i);
+
+            if (row.getCell(1).getStringCellValue().isEmpty()){
+                continue;
+            }
+
             List<Integer> scores = new ArrayList<>();
 
             Excel data = new Excel();
@@ -71,7 +82,8 @@ public class ExcelController {
 
         model.addAttribute("datas", dataList);
 
-        log.
+        scoreService.saveWeekData(dataList);
+
 
         return ResponseEntity.ok(dataList);
     }

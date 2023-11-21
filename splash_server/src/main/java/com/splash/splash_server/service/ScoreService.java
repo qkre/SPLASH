@@ -1,5 +1,6 @@
 package com.splash.splash_server.service;
 
+import com.splash.splash_server.domain.excel.Excel;
 import com.splash.splash_server.domain.score.Score;
 import com.splash.splash_server.domain.user.User;
 import com.splash.splash_server.dto.AddScoreRequestDto;
@@ -27,7 +28,21 @@ public class ScoreService {
             return scoreRepository.save(Score.builder().date(requestDto.getDate()).score(requestDto.getScore()).user(user).build()).getScoreKey();
 
         } else {
-            return -1L;
+            userRepository.save(
+                    User.builder()
+                            .name(requestDto.getUserName())
+                            .gender(0)
+                            .build()
+            );
+            User user = userRepository.findByName(requestDto.getUserName()).get();
+
+            return scoreRepository.save(
+                    Score.builder()
+                            .date(requestDto.getDate())
+                            .score(requestDto.getScore())
+                            .user(user)
+                            .build()
+            ).getScoreKey();
         }
     }
 
@@ -35,12 +50,30 @@ public class ScoreService {
 
         Optional<User> userOptional = userRepository.findByName(userName);
 
-        if (userOptional.isPresent()){
+        if (userOptional.isPresent()) {
             User user = userOptional.get();
 
             return scoreRepository.findByUser(user).get();
-        } else{
+        } else {
             return new ArrayList<>();
         }
+    }
+
+    public String saveWeekData(List<Excel> datas) {
+
+        for (Excel data : datas) {
+            String name = data.getName();
+            List<Integer> scores = data.getScores();
+
+            for (int i = 1; i <= 3; i++) {
+                AddScoreRequestDto requestDto = new AddScoreRequestDto();
+                requestDto.setUserName(name);
+                requestDto.setDate(" 주차");
+                requestDto.setScore(scores.get(i - 1));
+                save(requestDto);
+            }
+        }
+
+        return "Saved";
     }
 }
