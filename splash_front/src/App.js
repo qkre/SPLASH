@@ -1,9 +1,12 @@
-import './App.css';
+import "./App.css";
+import MainPage from "./page/MainPage";
+import UploadPage from "./page/UploadPage";
 
 function App() {
   return (
     <div>
-      SPLASH
+      {MainPage()}
+      {UploadPage()}
     </div>
   );
 }
