@@ -31,8 +31,18 @@ public class ScoreApiController {
         }
     }
 
-    @GetMapping("/{name}/getscores")
-    public ResponseEntity<List<Score>> getScores(@PathVariable String name){
+    @PostMapping("/last")
+    public ResponseEntity<List<Score>> getScores(@RequestBody String name){
         return ResponseEntity.ok(scoreService.getUserScore(name));
+    }
+
+    @PostMapping("//total")
+    public ResponseEntity<Integer> getTotalScore(@RequestBody String name){
+        return ResponseEntity.ok(scoreService.getTotalScore(name));
+    }
+
+    @PostMapping("/average")
+    public ResponseEntity<Double> getAverageScore(@RequestBody String name){
+        return ResponseEntity.ok(scoreService.getAverageScore(name));
     }
 }

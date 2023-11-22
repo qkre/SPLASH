@@ -2,9 +2,11 @@ package com.splash.splash_server.service;
 
 import com.splash.splash_server.domain.excel.Excel;
 import com.splash.splash_server.domain.score.Score;
+import com.splash.splash_server.domain.score.TotalScore;
 import com.splash.splash_server.domain.user.User;
 import com.splash.splash_server.dto.AddScoreRequestDto;
 import com.splash.splash_server.repository.ScoreRepository;
+import com.splash.splash_server.repository.TotalScoreRepository;
 import com.splash.splash_server.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,8 @@ import java.util.Optional;
 @Service
 public class ScoreService {
 
+    final private TotalScoreRepository totalScoreRepository;
+
     final private ScoreRepository scoreRepository;
 
     final private UserRepository userRepository;
@@ -25,22 +29,41 @@ public class ScoreService {
         if (userRepository.findByName(requestDto.getUserName()).isPresent()) {
             User user = userRepository.findByName(requestDto.getUserName()).get();
 
-            return scoreRepository.save(Score.builder().date(requestDto.getDate()).score(requestDto.getScore()).user(user).build()).getScoreKey();
+            if (scoreRepository.findByUserAndDate(user, requestDto.getDate()).isPresent()) {
+                Score existData = scoreRepository.findByUserAndDate(user, requestDto.getDate()).get();
+
+                existData.setFirstScore(requestDto.getFirstScore());
+                existData.setSecondScore(requestDto.getSecondScore());
+                existData.setThirdScore(requestDto.getThirdScore());
+
+                return scoreRepository.save(existData).getScoreKey();
+            } else {
+                return scoreRepository.save(
+                        Score.builder()
+                                .user(user)
+                                .date(requestDto.getDate())
+                                .firstScore(requestDto.getFirstScore())
+                                .secondScore(requestDto.getSecondScore())
+                                .thirdScore(requestDto.getThirdScore())
+                                .build()
+                ).getScoreKey();
+            }
 
         } else {
             userRepository.save(
                     User.builder()
-                            .name(requestDto.getUserName())
                             .gender(0)
+                            .name(requestDto.getUserName())
                             .build()
             );
             User user = userRepository.findByName(requestDto.getUserName()).get();
-
             return scoreRepository.save(
                     Score.builder()
-                            .date(requestDto.getDate())
-                            .score(requestDto.getScore())
                             .user(user)
+                            .firstScore(requestDto.getFirstScore())
+                            .secondScore(requestDto.getSecondScore())
+                            .thirdScore(requestDto.getThirdScore())
+                            .date(requestDto.getDate())
                             .build()
             ).getScoreKey();
         }
@@ -59,21 +82,62 @@ public class ScoreService {
         }
     }
 
-    public String saveWeekData(List<Excel> datas) {
+    public String saveExcelData(List<Excel> datas) {
 
         for (Excel data : datas) {
             String name = data.getName();
-            List<Integer> scores = data.getScores();
+            String date = data.getDate();
+            int firstScore = data.getFirstScore();
+            int secondScore = data.getSecondScore();
+            int thirdScore = data.getThirdScore();
+            int totalScore = data.getTotalScore();
+            int played = data.getPlayed();
+            double average = data.getAverage();
 
-            for (int i = 1; i <= 3; i++) {
-                AddScoreRequestDto requestDto = new AddScoreRequestDto();
-                requestDto.setUserName(name);
-                requestDto.setDate(" 주차");
-                requestDto.setScore(scores.get(i - 1));
-                save(requestDto);
-            }
+            AddScoreRequestDto requestDto = new AddScoreRequestDto(
+                    name, date, firstScore, secondScore, thirdScore
+            );
+
+            save(requestDto);
+
+
+            saveTotalScore(name, totalScore, played, average);
+
         }
 
         return "Saved";
+    }
+
+    public void saveTotalScore(String name, int totalScore, int played, double average) {
+        User user = userRepository.findByName(name).orElseThrow();
+
+        if (totalScoreRepository.findByUser(user).isPresent()) {
+            TotalScore existData = totalScoreRepository.findByUser(user).get();
+            existData.setTotalScore(totalScore);
+            existData.setPlayed(played);
+            existData.setAverage(average);
+            totalScoreRepository.save(existData);
+        } else {
+            totalScoreRepository.save(
+                    TotalScore.builder()
+                            .user(user)
+                            .totalScore(totalScore)
+                            .played(played)
+                            .average(average)
+                            .build()
+            );
+        }
+    }
+
+    public int getTotalScore(String name) {
+        User user = userRepository.findByName(name).orElseThrow();
+
+        return totalScoreRepository.findByUser(user).get().getTotalScore();
+    }
+
+    public Double getAverageScore(String name) {
+        User user = userRepository.findByName(name).orElseThrow();
+
+        return totalScoreRepository.findByUser(user).get().getAverage();
     }
 }

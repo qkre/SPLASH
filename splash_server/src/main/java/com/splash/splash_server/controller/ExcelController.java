@@ -1,6 +1,5 @@
 package com.splash.splash_server.controller;
 
-import com.mysql.cj.log.Log;
 import com.splash.splash_server.domain.excel.Excel;
 import com.splash.splash_server.service.ScoreService;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 @RequiredArgsConstructor
 @Controller
@@ -32,12 +30,12 @@ public class ExcelController {
     private final ScoreService scoreService;
 
     @GetMapping("/test")
-    public ResponseEntity<String> main(){
+    public ResponseEntity<String> main() {
         return ResponseEntity.ok("EXCEL");
     }
 
     @PostMapping("/read")
-    public ResponseEntity<List<Excel>> readExcel(@RequestParam("file")MultipartFile file, Model model) throws IOException{
+    public ResponseEntity<List<Excel>> readExcel(@RequestParam("file") MultipartFile file, Model model) throws IOException {
 
         List<Excel> dataList = new ArrayList<>();
 
@@ -45,15 +43,15 @@ public class ExcelController {
 
         String extensions = FilenameUtils.getExtension(file.getOriginalFilename());
 
-        if(!extensions.equals("xlsx") && !extensions.equals("xls")){
+        if (!extensions.equals("xlsx") && !extensions.equals("xls")) {
             throw new IOException("Not Excel type.");
         }
 
         Workbook workbook = null;
 
-        if (extensions.equals("xlsx")){
+        if (extensions.equals("xlsx")) {
             workbook = new XSSFWorkbook(file.getInputStream());
-        } else if (extensions.equals("xls")){
+        } else if (extensions.equals("xls")) {
             workbook = new HSSFWorkbook(file.getInputStream());
         }
 
@@ -63,7 +61,7 @@ public class ExcelController {
         for (int i = 1; i < workSheet.getPhysicalNumberOfRows(); i++) {
             Row row = workSheet.getRow(i);
 
-            if (row.getCell(1).getStringCellValue().isEmpty()){
+            if (row.getCell(1).getStringCellValue().isEmpty()) {
                 continue;
             }
 
@@ -72,17 +70,20 @@ public class ExcelController {
             Excel data = new Excel();
 
             data.setName(row.getCell(1).getStringCellValue());
-            scores.add((int) row.getCell(2).getNumericCellValue());
-            scores.add((int) row.getCell(3).getNumericCellValue());
-            scores.add((int) row.getCell(4).getNumericCellValue());
-            data.setScores(scores);
+            data.setFirstScore((int) row.getCell(2).getNumericCellValue());
+            data.setSecondScore((int) row.getCell(3).getNumericCellValue());
+            data.setThirdScore((int) row.getCell(4).getNumericCellValue());
+            data.setDate(file.getOriginalFilename().split(" ")[2]);
+            data.setTotalScore((int) row.getCell(7).getNumericCellValue());
+            data.setPlayed((int) row.getCell(8).getNumericCellValue());
+            data.setAverage((double) row.getCell(9).getNumericCellValue());
 
             dataList.add(data);
         }
 
         model.addAttribute("datas", dataList);
 
-        scoreService.saveWeekData(dataList);
+        scoreService.saveExcelData(dataList);
 
 
         return ResponseEntity.ok(dataList);

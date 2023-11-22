@@ -9,5 +9,11 @@ import java.util.List;
 @Setter
 public class Excel {
     private String name;
-    private List<Integer> scores;
+    private int firstScore;
+    private int secondScore;
+    private int thirdScore;
+    private String date;
+    private int played;
+    private int totalScore;
+    private double average;
 }

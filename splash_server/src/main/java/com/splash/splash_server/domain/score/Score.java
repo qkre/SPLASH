@@ -10,17 +10,24 @@ import java.time.LocalDateTime;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@Setter
 @Table(name = "score")
 @EntityListeners(AuditingEntityListener.class)
 @Entity
 public class Score {
     @Id
     @Column(name = "scoreKey")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long scoreKey;
 
-    @Column(name = "score")
-    private int score;
+    @Column(name = "firstScore")
+    private int firstScore;
+
+    @Column(name = "secondScore")
+    private int secondScore;
+
+    @Column(name = "thirdScore")
+    private int thirdScore;
 
     @Column(name = "date")
     private String date;
@@ -34,9 +41,11 @@ public class Score {
     private LocalDateTime createdAt;
 
     @Builder
-    public Score(String date, int score, User user) {
+    public Score(int firstScore, int secondScore, int thirdScore, String date, User user) {
+        this.firstScore = firstScore;
+        this.secondScore = secondScore;
+        this.thirdScore = thirdScore;
         this.date = date;
-        this.score = score;
         this.user = user;
     }
 }

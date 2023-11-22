@@ -10,6 +10,6 @@ import java.util.Optional;
 public interface ScoreRepository extends JpaRepository<Score, Long> {
 
     Optional<List<Score>> findByUser(User user);
-
+    Optional<Score> findByUserAndDate(User user, String date);
     Optional<Score> findTopByOrderByCreatedAtDesc();
 }
