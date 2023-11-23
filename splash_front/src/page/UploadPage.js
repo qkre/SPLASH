@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 export default function UploadPage() {
+  const navigate = useNavigate();
   const onSelectFile = async () => {
     const fileSelector = document.querySelector(".fileSelector");
     if (fileSelector.files[0]) {
@@ -17,14 +19,18 @@ export default function UploadPage() {
         });
 
         console.log(response.data);
+        alert("업로드 성공!");
+        navigate("/");
       } catch (err) {
         console.error("Upload Failed : ", err);
+        alert("업로드 실패..");
       }
     }
   };
 
   return (
     <div>
+      업로드 페이지
       <input
         className="fileSelector"
         type="file"

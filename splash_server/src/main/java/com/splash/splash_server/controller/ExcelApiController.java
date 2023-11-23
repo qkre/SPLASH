@@ -34,8 +34,8 @@ public class ExcelController {
         return ResponseEntity.ok("EXCEL");
     }
 
-    @PostMapping("/read")
-    public ResponseEntity<List<Excel>> readExcel(@RequestParam("file") MultipartFile file, Model model) throws IOException {
+    @PostMapping("/upload")
+    public ResponseEntity<String> readExcel(@RequestParam("file") MultipartFile file, Model model) throws IOException {
 
         List<Excel> dataList = new ArrayList<>();
 
@@ -86,6 +86,6 @@ public class ExcelController {
         scoreService.saveExcelData(dataList);
 
 
-        return ResponseEntity.ok(dataList);
+        return ResponseEntity.ok("업로드 성공");
     }
 }
