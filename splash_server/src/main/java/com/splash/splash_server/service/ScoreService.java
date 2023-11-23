@@ -35,6 +35,7 @@ public class ScoreService {
                 existData.setFirstScore(requestDto.getFirstScore());
                 existData.setSecondScore(requestDto.getSecondScore());
                 existData.setThirdScore(requestDto.getThirdScore());
+                existData.setDayTotalScore(requestDto.getDayTotalScore());
 
                 return scoreRepository.save(existData).getScoreKey();
             } else {
@@ -45,6 +46,7 @@ public class ScoreService {
                                 .firstScore(requestDto.getFirstScore())
                                 .secondScore(requestDto.getSecondScore())
                                 .thirdScore(requestDto.getThirdScore())
+                                .dayTotalScore(requestDto.getDayTotalScore())
                                 .build()
                 ).getScoreKey();
             }
@@ -82,30 +84,34 @@ public class ScoreService {
         }
     }
 
-    public String saveExcelData(List<Excel> datas) {
+    public boolean saveExcelData(List<Excel> datas) {
+        try {
+            for (Excel data : datas) {
+                String name = data.getName();
+                String date = data.getDate();
+                int firstScore = data.getFirstScore();
+                int secondScore = data.getSecondScore();
+                int thirdScore = data.getThirdScore();
+                int dayTotalScore = data.getDayTotalScore();
+                int totalScore = data.getTotalScore();
+                int played = data.getPlayed();
+                double average = data.getAverage();
 
-        for (Excel data : datas) {
-            String name = data.getName();
-            String date = data.getDate();
-            int firstScore = data.getFirstScore();
-            int secondScore = data.getSecondScore();
-            int thirdScore = data.getThirdScore();
-            int totalScore = data.getTotalScore();
-            int played = data.getPlayed();
-            double average = data.getAverage();
+                AddScoreRequestDto requestDto = new AddScoreRequestDto(
+                        name, date, firstScore, secondScore, thirdScore, dayTotalScore
+                );
 
-            AddScoreRequestDto requestDto = new AddScoreRequestDto(
-                    name, date, firstScore, secondScore, thirdScore
-            );
-
-            save(requestDto);
+                save(requestDto);
 
 
-            saveTotalScore(name, totalScore, played, average);
+                saveTotalScore(name, totalScore, played, average);
 
+            }
+
+            return true;
+        } catch (Exception e){
+            return false;
         }
-
-        return "Saved";
     }
 
     public void saveTotalScore(String name, int totalScore, int played, double average) {
@@ -139,5 +145,17 @@ public class ScoreService {
         User user = userRepository.findByName(name).orElseThrow();
 
         return totalScoreRepository.findByUser(user).get().getAverage();
+    }
+
+    public List<Score> getWeekScore(String date){
+        List<Score> scores = scoreRepository.findByDate(date).orElseThrow();
+
+        return scores;
+    }
+
+    public List<TotalScore> getAllScore() {
+        List<TotalScore> scores = totalScoreRepository.findAll();
+
+        return scores;
     }
 }

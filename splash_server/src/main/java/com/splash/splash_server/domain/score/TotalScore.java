@@ -23,7 +23,7 @@ public class TotalScore {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long totalScoreKey;
 
-    @OneToOne(targetEntity = User.class, fetch = FetchType.LAZY)
+    @OneToOne(targetEntity = User.class)
     @JoinColumn(name = "userKey")
     private User user;
 

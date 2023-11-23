@@ -29,10 +29,13 @@ public class Score {
     @Column(name = "thirdScore")
     private int thirdScore;
 
+    @Column
+    private int dayTotalScore;
+
     @Column(name = "date")
     private String date;
 
-    @ManyToOne(targetEntity = User.class, fetch = FetchType.LAZY)
+    @ManyToOne(targetEntity = User.class)
     @JoinColumn(name = "userKey")
     private User user;
 
@@ -41,10 +44,11 @@ public class Score {
     private LocalDateTime createdAt;
 
     @Builder
-    public Score(int firstScore, int secondScore, int thirdScore, String date, User user) {
+    public Score(int firstScore, int secondScore, int thirdScore, int dayTotalScore, String date, User user) {
         this.firstScore = firstScore;
         this.secondScore = secondScore;
         this.thirdScore = thirdScore;
+        this.dayTotalScore = dayTotalScore;
         this.date = date;
         this.user = user;
     }

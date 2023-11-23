@@ -12,6 +12,7 @@ public class Excel {
     private int firstScore;
     private int secondScore;
     private int thirdScore;
+    private int dayTotalScore;
     private String date;
     private int played;
     private int totalScore;

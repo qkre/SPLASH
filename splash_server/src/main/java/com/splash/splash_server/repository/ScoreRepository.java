@@ -11,5 +11,6 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
 
     Optional<List<Score>> findByUser(User user);
     Optional<Score> findByUserAndDate(User user, String date);
+    Optional<List<Score>> findByDate(String date);
     Optional<Score> findTopByOrderByCreatedAtDesc();
 }
