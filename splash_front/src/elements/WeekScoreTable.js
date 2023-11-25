@@ -5,8 +5,7 @@ export default function WeekScoreTable(props) {
   const [date, setDate] = useState();
   const [tableElement, setTableElement] = useState([]);
   useEffect(() => {
-    if (scores.length > 0) {
-      console.log(scores);
+    try {
       const scoreList = scores.map((score, index) => {
         const userName = score.user.name;
         const date = score.date;
@@ -30,8 +29,8 @@ export default function WeekScoreTable(props) {
         );
       });
       setTableElement(scoreList);
-    } else {
-      alert("데이터 없음!");
+    } catch (e) {
+      console.error(e);
     }
   }, [scores]);
 

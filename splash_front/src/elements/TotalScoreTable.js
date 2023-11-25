@@ -5,26 +5,30 @@ export default function TotalScoreTable(props) {
   const [date, setDate] = useState();
   const [tableElement, setTableElement] = useState([]);
   useEffect(() => {
-    const scoreList = scores.map((score, index) => {
-      const userName = score.user.name;
-      const date = score.date;
-      const totalScore = score.totalScore;
-      const played = score.played;
-      const average = score.average.toFixed(2);
+    try {
+      const scoreList = scores.map((score, index) => {
+        const userName = score.user.name;
+        const date = score.date;
+        const totalScore = score.totalScore;
+        const played = score.played;
+        const average = score.average.toFixed(2);
 
-      setDate(date);
+        setDate(date);
 
-      return (
-        <tr key={index}>
-          <td>{index + 1}등</td>
-          <td>{played}게임</td>
-          <td>{userName}</td>
-          <td>{totalScore}점</td>
-          <td>{average}점</td>
-        </tr>
-      );
-    });
-    setTableElement(scoreList);
+        return (
+          <tr key={index}>
+            <td>{index + 1}등</td>
+            <td>{played}게임</td>
+            <td>{userName}</td>
+            <td>{totalScore}점</td>
+            <td>{average}점</td>
+          </tr>
+        );
+      });
+      setTableElement(scoreList);
+    } catch (e) {
+      console.error(e);
+    }
   }, [scores]);
 
   return (
