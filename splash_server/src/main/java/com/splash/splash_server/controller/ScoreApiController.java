@@ -19,9 +19,14 @@ public class ScoreApiController {
     private final ScoreService scoreService;
 
     @GetMapping("/week/{N}")
-    public ResponseEntity<List<Score>> getWeekScore(@PathVariable String N) {
+    public ResponseEntity<List<Score>> getWeekScore(@PathVariable int N) {
 
         return ResponseEntity.ok(scoreService.getWeekScore(N));
+    }
+
+    @GetMapping("/weeks")
+    public ResponseEntity<List<Integer>> getWeeksData(){
+        return ResponseEntity.ok(scoreService.getWeeksData());
     }
 
     @GetMapping("/all")

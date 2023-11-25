@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RequiredArgsConstructor
 @Getter
@@ -25,6 +27,12 @@ import java.util.List;
 public class ExcelService {
 
     private final ScoreService scoreService;
+
+    public static int extractWeekNumbers(String fileName) {
+        String replaced = fileName.replaceAll("[^0-9]", "");
+        return Integer.parseInt(replaced);
+
+    }
 
     public boolean read(MultipartFile file) throws IOException {
 
@@ -56,15 +64,15 @@ public class ExcelService {
                 continue;
             }
             String userName = row.getCell(1).getStringCellValue();
-            int firstScore = (int)row.getCell(2).getNumericCellValue();
-            int secondScore = (int)row.getCell(3).getNumericCellValue();
-            int thirdScore = (int)row.getCell(4).getNumericCellValue();
-            int dayTotalScore = (int)row.getCell(5).getNumericCellValue();
-            String date = file.getOriginalFilename().split(" ")[2];
-            int totalScore = (int)row.getCell(7).getNumericCellValue();
-            int played = (int)row.getCell(8).getNumericCellValue();
+            int firstScore = (int) row.getCell(2).getNumericCellValue();
+            int secondScore = (int) row.getCell(3).getNumericCellValue();
+            int thirdScore = (int) row.getCell(4).getNumericCellValue();
+            int dayTotalScore = firstScore + secondScore + thirdScore;
+            int week = extractWeekNumbers(file.getOriginalFilename().split(" ")[2]);
+            String gender = row.getCell(10).getStringCellValue();
 
-            if(dayTotalScore == 0){
+
+            if (dayTotalScore == 0) {
                 continue;
             }
 
@@ -75,9 +83,8 @@ public class ExcelService {
             data.setSecondScore(secondScore);
             data.setThirdScore(thirdScore);
             data.setDayTotalScore(dayTotalScore);
-            data.setDate(file.getOriginalFilename().split(" ")[2]);
-            data.setTotalScore(totalScore);
-            data.setPlayed(played);
+            data.setWeek(week);
+            data.setGender(gender);
 
             dataList.add(data);
         }

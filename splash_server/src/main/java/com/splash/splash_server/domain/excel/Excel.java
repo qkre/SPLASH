@@ -13,8 +13,7 @@ public class Excel {
     private int secondScore;
     private int thirdScore;
     private int dayTotalScore;
-    private String date;
-    private int played;
-    private int totalScore;
-    private double average;
+    private int week;
+    private String gender;
+
 }

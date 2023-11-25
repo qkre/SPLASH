@@ -29,8 +29,8 @@ public class ScoreService {
         if (userRepository.findByName(requestDto.getUserName()).isPresent()) {
             User user = userRepository.findByName(requestDto.getUserName()).get();
 
-            if (scoreRepository.findByUserAndDate(user, requestDto.getDate()).isPresent()) {
-                Score existData = scoreRepository.findByUserAndDate(user, requestDto.getDate()).get();
+            if (scoreRepository.findByUserAndWeek(user, requestDto.getWeek()).isPresent()) {
+                Score existData = scoreRepository.findByUserAndWeek(user, requestDto.getWeek()).get();
 
                 existData.setFirstScore(requestDto.getFirstScore());
                 existData.setSecondScore(requestDto.getSecondScore());
@@ -42,7 +42,7 @@ public class ScoreService {
                 return scoreRepository.save(
                         Score.builder()
                                 .user(user)
-                                .date(requestDto.getDate())
+                                .week(requestDto.getWeek())
                                 .firstScore(requestDto.getFirstScore())
                                 .secondScore(requestDto.getSecondScore())
                                 .thirdScore(requestDto.getThirdScore())
@@ -65,7 +65,8 @@ public class ScoreService {
                             .firstScore(requestDto.getFirstScore())
                             .secondScore(requestDto.getSecondScore())
                             .thirdScore(requestDto.getThirdScore())
-                            .date(requestDto.getDate())
+                            .dayTotalScore(requestDto.getDayTotalScore())
+                            .week(requestDto.getWeek())
                             .build()
             ).getScoreKey();
         }
@@ -88,50 +89,73 @@ public class ScoreService {
         try {
             for (Excel data : datas) {
                 String name = data.getName();
-                String date = data.getDate();
+                int week = data.getWeek();
                 int firstScore = data.getFirstScore();
                 int secondScore = data.getSecondScore();
                 int thirdScore = data.getThirdScore();
                 int dayTotalScore = data.getDayTotalScore();
-                int totalScore = data.getTotalScore();
-                int played = data.getPlayed();
-                double average = data.getAverage();
 
                 AddScoreRequestDto requestDto = new AddScoreRequestDto(
-                        name, date, firstScore, secondScore, thirdScore, dayTotalScore
+                        name, week, firstScore, secondScore, thirdScore, dayTotalScore
                 );
 
                 save(requestDto);
 
-
-                saveTotalScore(name, totalScore, played, average);
+                saveTotalScore(requestDto);
 
             }
 
             return true;
-        } catch (Exception e){
+        } catch (Exception e) {
             return false;
         }
     }
 
-    public void saveTotalScore(String name, int totalScore, int played, double average) {
-        User user = userRepository.findByName(name).orElseThrow();
+    public void saveTotalScore(AddScoreRequestDto requestDto) {
+        User user = userRepository.findByName(requestDto.getUserName()).orElseThrow();
 
         if (totalScoreRepository.findByUser(user).isPresent()) {
-            TotalScore existData = totalScoreRepository.findByUser(user).get();
-            existData.setTotalScore(totalScore);
-            existData.setPlayed(played);
-            existData.setAverage(average);
-            totalScoreRepository.save(existData);
+            TotalScore target = totalScoreRepository.findByUser(user).get();
+            int targetTotalScore = target.getTotalScore();
+            double targetAverage = target.getAverage();
+            int targetPlayed = target.getPlayed();
+            int played = 0;
+
+            if (requestDto.getFirstScore() != 0) played++;
+            if (requestDto.getSecondScore() != 0) played++;
+            if (requestDto.getThirdScore() != 0) played++;
+
+            targetTotalScore += requestDto.getDayTotalScore();
+            targetPlayed += played;
+            targetAverage = targetTotalScore / targetPlayed;
+
+            target.setTotalScore(targetTotalScore);
+            target.setPlayed(targetPlayed);
+            target.setAverage(targetAverage);
+            totalScoreRepository.save(target);
         } else {
-            totalScoreRepository.save(
-                    TotalScore.builder()
-                            .user(user)
-                            .totalScore(totalScore)
-                            .played(played)
-                            .average(average)
-                            .build()
-            );
+            TotalScore target = new TotalScore();
+
+            int targetTotalScore = 0;
+            double targetAverage = 0.0;
+            int targetPlayed = 0;
+            int played = 0;
+            if (requestDto.getFirstScore() != 0) played++;
+            if (requestDto.getSecondScore() != 0) played++;
+            if (requestDto.getThirdScore() != 0) played++;
+
+            targetTotalScore += requestDto.getDayTotalScore();
+            targetPlayed += played;
+            targetAverage = targetTotalScore / targetPlayed;
+
+            targetAverage = Math.round(targetAverage * 100.0) / 100.0;
+
+            target.setUser(user);
+            target.setTotalScore(targetTotalScore);
+            target.setAverage(targetAverage);
+            target.setPlayed(targetPlayed);
+
+            totalScoreRepository.save(target);
         }
     }
 
@@ -147,15 +171,21 @@ public class ScoreService {
         return totalScoreRepository.findByUser(user).get().getAverage();
     }
 
-    public List<Score> getWeekScore(String date){
-        List<Score> scores = scoreRepository.findByDate(date).orElseThrow();
+    public List<Score> getWeekScore(int week) {
+        List<Score> scores = scoreRepository.findByWeek(week).orElseThrow();
 
         return scores;
     }
 
     public List<TotalScore> getAllScore() {
-        List<TotalScore> scores = totalScoreRepository.findAll();
+        List<TotalScore> scores = totalScoreRepository.findAllByOrderByAverageDesc();
 
         return scores;
+    }
+
+    public List<Integer> getWeeksData(){
+        List<Integer> dates = scoreRepository.findDistinctDateByOrderByWeekDesc();
+
+        return dates;
     }
 }
