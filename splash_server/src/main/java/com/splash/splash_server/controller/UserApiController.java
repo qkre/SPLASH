@@ -1,11 +1,14 @@
 package com.splash.splash_server.controller;
 
+import com.splash.splash_server.domain.user.User;
 import com.splash.splash_server.dto.AddUserRequestDto;
 import com.splash.splash_server.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @Controller
@@ -31,5 +34,10 @@ public class UserApiController {
         Long key = userService.getUserKey(name);
 
         return ResponseEntity.ok("Key is " + key);
+    }
+
+    @GetMapping("/multi/{name}")
+    public ResponseEntity<List<User>> test2(@PathVariable String name){
+        return ResponseEntity.ok(userService.getUsers(name));
     }
 }

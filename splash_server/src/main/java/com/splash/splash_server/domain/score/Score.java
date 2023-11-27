@@ -33,7 +33,17 @@ public class Score {
     private int dayTotalScore;
 
     @Column
+    private double dayAverage;
+
+
+    @Column
+    private String semester;
+
+    @Column
     private int week;
+
+    @Column
+    private int ranks;
 
     @ManyToOne(targetEntity = User.class)
     @JoinColumn(name = "userKey")
@@ -44,11 +54,12 @@ public class Score {
     private LocalDateTime createdAt;
 
     @Builder
-    public Score(int firstScore, int secondScore, int thirdScore, int dayTotalScore, int week, User user) {
+    public Score(int firstScore, int secondScore, int thirdScore, int dayTotalScore, String semester, int week, User user) {
         this.firstScore = firstScore;
         this.secondScore = secondScore;
         this.thirdScore = thirdScore;
         this.dayTotalScore = dayTotalScore;
+        this.semester = semester;
         this.week = week;
         this.user = user;
     }

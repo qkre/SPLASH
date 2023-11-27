@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/score")
@@ -18,20 +19,21 @@ public class ScoreApiController {
 
     private final ScoreService scoreService;
 
-    @GetMapping("/week/{N}")
-    public ResponseEntity<List<Score>> getWeekScore(@PathVariable int N) {
+    @GetMapping("/week/{semester}/{N}")
+    public ResponseEntity<List<Score>> getWeekScore(@PathVariable String semester, @PathVariable int N) {
 
-        return ResponseEntity.ok(scoreService.getWeekScore(N));
+        return ResponseEntity.ok(scoreService.getWeekScore(semester, N));
     }
 
-    @GetMapping("/weeks")
-    public ResponseEntity<List<Integer>> getWeeksData(){
-        return ResponseEntity.ok(scoreService.getWeeksData());
+    @GetMapping("/dates")
+    public ResponseEntity<List<Map<String, Object>>> getDates() {
+        return ResponseEntity.ok(scoreService.getDateData());
     }
 
-    @GetMapping("/all")
-    public ResponseEntity<List<TotalScore>> getAllScore(){
-        return ResponseEntity.ok(scoreService.getAllScore());
+
+    @GetMapping("/{week}/{userName}")
+    public ResponseEntity<Integer> getUserWeekRank(@PathVariable int week, @PathVariable String userName) {
+        return ResponseEntity.ok(scoreService.getUserWeekRank(userName, week));
     }
 
     @PostMapping("/add")
@@ -46,17 +48,12 @@ public class ScoreApiController {
     }
 
     @PostMapping("/last")
-    public ResponseEntity<List<Score>> getScores(@RequestBody String name) {
+    public ResponseEntity<List<List<Score>>> getScores(@RequestBody String name) {
         return ResponseEntity.ok(scoreService.getUserScore(name));
     }
 
-    @PostMapping("/total")
-    public ResponseEntity<Integer> getTotalScore(@RequestBody String name) {
-        return ResponseEntity.ok(scoreService.getTotalScore(name));
-    }
-
-    @PostMapping("/average")
-    public ResponseEntity<Double> getAverageScore(@RequestBody String name) {
-        return ResponseEntity.ok(scoreService.getAverageScore(name));
+    @GetMapping("/{semester}/all")
+    public ResponseEntity<List<TotalScore>> getSemesterScore(@PathVariable String semester){
+        return ResponseEntity.ok(scoreService.getSemesterScore(semester));
     }
 }

@@ -19,10 +19,10 @@ public class User {
     private String name;
 
     @Column(name = "gender", nullable = false)
-    private int gender;
+    private String gender;
 
     @Builder
-    public User(String name, int gender){
+    public User(String name, String gender){
         this.name = name;
         this.gender = gender;
     }

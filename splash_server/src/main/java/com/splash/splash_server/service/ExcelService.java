@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 @Setter
 @Service
 public class ExcelService {
-
+    private final UserService userService;
     private final ScoreService scoreService;
 
     public static int extractWeekNumbers(String fileName) {
@@ -34,64 +34,73 @@ public class ExcelService {
 
     }
 
-    public boolean read(MultipartFile file) throws IOException {
-
-        List<Excel> dataList = new ArrayList<>();
-
-        System.out.println("file.getOriginalFilename() = " + file.getOriginalFilename());
-
-        String extensions = FilenameUtils.getExtension(file.getOriginalFilename());
-
-        if (!extensions.equals("xlsx") && !extensions.equals("xls")) {
-            throw new IOException("Not Excel type.");
-        }
-
-        Workbook workbook = null;
-
-        if (extensions.equals("xlsx")) {
-            workbook = new XSSFWorkbook(file.getInputStream());
-        } else if (extensions.equals("xls")) {
-            workbook = new HSSFWorkbook(file.getInputStream());
-        } else return false;
-
-        Sheet workSheet = workbook.getSheetAt(0);
+    public boolean read(MultipartFile[] files) throws IOException {
 
 
-        for (int i = 1; i < workSheet.getPhysicalNumberOfRows(); i++) {
-            Row row = workSheet.getRow(i);
+        for (MultipartFile file : files) {
+            List<Excel> dataList = new ArrayList<>();
 
-            if (row.getCell(1).getStringCellValue().isEmpty()) {
-                continue;
-            }
-            String userName = row.getCell(1).getStringCellValue();
-            int firstScore = (int) row.getCell(2).getNumericCellValue();
-            int secondScore = (int) row.getCell(3).getNumericCellValue();
-            int thirdScore = (int) row.getCell(4).getNumericCellValue();
-            int dayTotalScore = firstScore + secondScore + thirdScore;
-            int week = extractWeekNumbers(file.getOriginalFilename().split(" ")[2]);
-            String gender = row.getCell(10).getStringCellValue();
+            System.out.println("file.getOriginalFilename() = " + file.getOriginalFilename());
 
+            String extensions = FilenameUtils.getExtension(file.getOriginalFilename());
 
-            if (dayTotalScore == 0) {
-                continue;
+            if (!extensions.equals("xlsx") && !extensions.equals("xls")) {
+                throw new IOException("Not Excel type.");
             }
 
-            Excel data = new Excel();
+            Workbook workbook = null;
 
-            data.setName(row.getCell(1).getStringCellValue());
-            data.setFirstScore(firstScore);
-            data.setSecondScore(secondScore);
-            data.setThirdScore(thirdScore);
-            data.setDayTotalScore(dayTotalScore);
-            data.setWeek(week);
-            data.setGender(gender);
+            if (extensions.equals("xlsx")) {
+                workbook = new XSSFWorkbook(file.getInputStream());
+            } else if (extensions.equals("xls")) {
+                workbook = new HSSFWorkbook(file.getInputStream());
+            } else return false;
 
-            dataList.add(data);
+            Sheet workSheet = workbook.getSheetAt(0);
+
+
+            for (int i = 1; i < workSheet.getPhysicalNumberOfRows(); i++) {
+                Row row = workSheet.getRow(i);
+
+                if (row == null){
+                    System.out.println("i = " + i);
+                }
+
+                if (row.getCell(1).getStringCellValue().isBlank()) {
+                    continue;
+                }
+                String userName = row.getCell(1).getStringCellValue();
+                int firstScore = (int) row.getCell(2).getNumericCellValue();
+                int secondScore = (int) row.getCell(3).getNumericCellValue();
+                int thirdScore = (int) row.getCell(4).getNumericCellValue();
+                int dayTotalScore = firstScore + secondScore + thirdScore;
+                String semester = file.getOriginalFilename().split(" ")[0] + " " + file.getOriginalFilename().split(" ")[1];
+                int week = extractWeekNumbers(file.getOriginalFilename().split(" ")[2]);
+                String gender = row.getCell(10).getStringCellValue();
+
+
+                if (dayTotalScore == 0) {
+                    continue;
+                }
+
+                Excel data = new Excel();
+
+                data.setName(row.getCell(1).getStringCellValue());
+                data.setFirstScore(firstScore);
+                data.setSecondScore(secondScore);
+                data.setThirdScore(thirdScore);
+                data.setDayTotalScore(dayTotalScore);
+                data.setSemester(semester);
+                data.setWeek(week);
+                data.setGender(gender);
+
+                dataList.add(data);
+            }
+
+            userService.saveExcelData(dataList);
+            scoreService.saveExcelData(dataList);
         }
-
-        dataList.sort(Comparator.comparingInt(Excel::getDayTotalScore).reversed());
-
-        return scoreService.saveExcelData(dataList);
+        return true;
     }
 
 }

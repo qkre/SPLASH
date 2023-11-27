@@ -8,11 +8,13 @@ import java.util.List;
 @Getter
 @Setter
 public class Excel {
+
     private String name;
     private int firstScore;
     private int secondScore;
     private int thirdScore;
     private int dayTotalScore;
+    private String semester;
     private int week;
     private String gender;
 

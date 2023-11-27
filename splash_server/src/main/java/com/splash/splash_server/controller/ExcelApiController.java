@@ -37,9 +37,9 @@ public class ExcelApiController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<String> readExcel(@RequestParam("file") MultipartFile file) throws IOException {
+    public ResponseEntity<String> readExcel(@RequestParam("file") MultipartFile[] files) throws IOException {
 
-        if (excelService.read(file)) {
+        if (excelService.read(files)) {
             return ResponseEntity.ok("업로드 성공");
 
         } else {

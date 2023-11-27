@@ -7,5 +7,10 @@ import lombok.Setter;
 @Setter
 public class AddUserRequestDto {
     private String name;
-    private int gender;
+    private String gender;
+
+    public AddUserRequestDto(String name, String gender) {
+        this.name = name;
+        this.gender = gender;
+    }
 }

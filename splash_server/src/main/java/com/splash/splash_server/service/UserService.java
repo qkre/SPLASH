@@ -1,10 +1,13 @@
 package com.splash.splash_server.service;
 
+import com.splash.splash_server.domain.excel.Excel;
 import com.splash.splash_server.domain.user.User;
 import com.splash.splash_server.dto.AddUserRequestDto;
 import com.splash.splash_server.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 
 @RequiredArgsConstructor
@@ -32,5 +35,22 @@ public class UserService {
         } else{
             return -1L;
         }
+    }
+
+
+    public void saveExcelData(List<Excel> datas){
+        for(Excel data: datas){
+            String name = data.getName();
+            String gender = data.getGender();
+
+            AddUserRequestDto requestDto = new AddUserRequestDto(
+                    name, gender
+            );
+            save(requestDto);
+        }
+    }
+
+    public List<User> getUsers(String name){
+        return userRepository.findByNameContains(name).orElseThrow();
     }
 }
