@@ -13,7 +13,7 @@ export default function WeekScoreTable(props) {
         const secondScore = score.secondScore;
         const thirdScore = score.thirdScore;
         const dayTotalScore = score.dayTotalScore;
-        const dayAverage = (dayTotalScore / 3).toFixed(2);
+        const dayAverage = score.dayAverage.toFixed(2);
         setDate(date);
 
         return (

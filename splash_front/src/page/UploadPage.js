@@ -6,11 +6,15 @@ export default function UploadPage() {
   const navigate = useNavigate();
   const onSelectFile = async () => {
     const fileSelector = document.querySelector(".fileSelector");
-    if (fileSelector.files[0]) {
-      const file = fileSelector.files[0];
+
+    if (fileSelector.files.length > 0) {
       const formData = new FormData();
-      console.log(file);
-      formData.append("file", file);
+
+      // 여러 파일을 formData 에 추가.
+      Array.from(fileSelector.files).forEach((file, index) => {
+        formData.append(`file`, file);
+      });
+
       try {
         const response = await axios.post("/api/excel/upload", formData, {
           headers: {
@@ -36,6 +40,7 @@ export default function UploadPage() {
         type="file"
         name="주간 점수"
         accept=".xls, .xlsx"
+        multiple
       />
       <button onClick={onSelectFile}>업로드 하기</button>
     </div>
